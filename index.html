@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HDFlim — Film İzle</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #111118;
+    --bg3: #18181f;
+    --card: #14141c;
+    --border: #ffffff0f;
+    --accent: #e63946;
+    --accent2: #ff6b6b;
+    --gold: #ffd166;
+    --text: #f0f0f5;
+    --muted: #888899;
+    --radius: 10px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; min-height:100vh; }
+
+  /* NAVBAR */
+  nav {
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    background:linear-gradient(to bottom, rgba(10,10,15,0.98), transparent);
+    padding:0 32px;
+    display:flex; align-items:center; justify-content:space-between;
+    height:64px;
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--accent); letter-spacing:2px; cursor:pointer; }
+  .logo span { color:var(--text); }
+  .search-wrap { position:relative; }
+  .search-wrap input {
+    background:var(--bg3); border:1px solid var(--border);
+    color:var(--text); padding:8px 16px 8px 40px;
+    border-radius:50px; font-size:14px; width:260px;
+    outline:none; transition:all .2s;
+  }
+  .search-wrap input:focus { border-color:var(--accent); width:300px; }
+  .search-wrap svg { position:absolute; left:12px; top:50%; transform:translateY(-50%); opacity:.4; }
+  .nav-count { font-size:12px; color:var(--muted); }
+
+  /* HERO */
+  .hero {
+    margin-top:64px;
+    padding:60px 32px 40px;
+    background:linear-gradient(135deg, #0a0a0f 0%, #1a0a12 50%, #0a0a0f 100%);
+    position:relative; overflow:hidden;
+  }
+  .hero::before {
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse 60% 80% at 70% 50%, rgba(230,57,70,0.08), transparent);
+    pointer-events:none;
+  }
+  .hero h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(40px,6vw,80px); line-height:1; margin-bottom:8px; }
+  .hero h1 span { color:var(--accent); }
+  .hero p { color:var(--muted); font-size:15px; max-width:500px; }
+
+  /* FILTERS */
+  .filters {
+    padding:20px 32px;
+    display:flex; gap:10px; flex-wrap:wrap;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+    position:sticky; top:64px; z-index:90;
+  }
+  .filter-btn {
+    padding:6px 16px; border-radius:50px;
+    border:1px solid var(--border);
+    background:transparent; color:var(--muted);
+    font-size:13px; cursor:pointer; transition:all .2s;
+    font-family:'Inter',sans-serif;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background:var(--accent); border-color:var(--accent);
+    color:#fff;
+  }
+
+  /* GRID */
+  .section { padding:32px; }
+  .section-title {
+    font-family:'Bebas Neue',sans-serif;
+    font-size:22px; letter-spacing:1px;
+    color:var(--muted); margin-bottom:20px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+  .grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap:16px;
+  }
+
+  /* CARD */
+  .card {
+    background:var(--card); border-radius:var(--radius);
+    border:1px solid var(--border);
+    overflow:hidden; cursor:pointer;
+    transition:transform .2s, border-color .2s, box-shadow .2s;
+    position:relative;
+  }
+  .card:hover {
+    transform:translateY(-4px) scale(1.01);
+    border-color:var(--accent);
+    box-shadow:0 12px 40px rgba(230,57,70,0.2);
+  }
+  .card-poster {
+    width:100%; aspect-ratio:2/3;
+    object-fit:cover; display:block;
+    background:var(--bg3);
+  }
+  .card-poster-placeholder {
+    width:100%; aspect-ratio:2/3;
+    background:linear-gradient(135deg, var(--bg3), var(--bg2));
+    display:flex; align-items:center; justify-content:center;
+    font-size:40px; color:var(--border);
+  }
+  .card-overlay {
+    position:absolute; inset:0;
+    background:linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%);
+    opacity:0; transition:opacity .2s;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .card:hover .card-overlay { opacity:1; }
+  .play-btn {
+    width:52px; height:52px; border-radius:50%;
+    background:var(--accent); border:none;
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; cursor:pointer;
+    transform:scale(0.8); transition:transform .2s;
+  }
+  .card:hover .play-btn { transform:scale(1); }
+  .card-info { padding:10px 12px 12px; }
+  .card-title { font-size:13px; font-weight:600; line-height:1.3; margin-bottom:4px; }
+  .card-meta { font-size:11px; color:var(--muted); display:flex; gap:6px; }
+  .badge {
+    display:inline-flex; align-items:center; gap:3px;
+    font-size:10px; padding:2px 7px; border-radius:4px;
+    font-weight:600;
+  }
+  .badge-hd { background:rgba(255,209,102,0.15); color:var(--gold); }
+  .badge-play { background:rgba(230,57,70,0.2); color:var(--accent2); }
+  .no-player { opacity:0.45; }
+
+  /* MODAL */
+  .modal-bg {
+    position:fixed; inset:0; z-index:1000;
+    background:rgba(0,0,0,0.92);
+    display:none; align-items:center; justify-content:center;
+    padding:20px;
+    backdrop-filter:blur(6px);
+  }
+  .modal-bg.open { display:flex; }
+  .modal {
+    background:var(--bg2); border-radius:14px;
+    border:1px solid var(--border);
+    width:100%; max-width:900px;
+    max-height:90vh; overflow-y:auto;
+    position:relative;
+    animation:modalIn .25s ease;
+  }
+  @keyframes modalIn { from { transform:scale(.95); opacity:0; } to { transform:scale(1); opacity:1; } }
+  .modal-close {
+    position:absolute; top:14px; right:14px;
+    background:var(--bg3); border:1px solid var(--border);
+    color:var(--text); width:36px; height:36px; border-radius:50%;
+    cursor:pointer; font-size:18px; z-index:10;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .2s;
+  }
+  .modal-close:hover { background:var(--accent); border-color:var(--accent); }
+  .modal-player {
+    width:100%; aspect-ratio:16/9;
+    background:#000; border-radius:14px 14px 0 0; overflow:hidden;
+  }
+  .modal-player iframe { width:100%; height:100%; border:none; }
+  .modal-body { padding:20px 24px 24px; }
+  .modal-title { font-family:'Bebas Neue',sans-serif; font-size:28px; margin-bottom:6px; }
+  .modal-meta { color:var(--muted); font-size:13px; margin-bottom:16px; display:flex; gap:12px; flex-wrap:wrap; }
+  .source-btns { display:flex; gap:8px; flex-wrap:wrap; }
+  .source-btn {
+    padding:7px 16px; border-radius:6px; font-size:13px;
+    border:1px solid var(--border); background:var(--bg3);
+    color:var(--muted); cursor:pointer; transition:all .15s;
+    font-family:'Inter',sans-serif;
+  }
+  .source-btn:hover, .source-btn.active {
+    background:var(--accent); border-color:var(--accent); color:#fff;
+  }
+  .modal-label { font-size:12px; color:var(--muted); margin:16px 0 8px; letter-spacing:.5px; text-transform:uppercase; }
+
+  /* EMPTY */
+  .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+  .empty-icon { font-size:48px; margin-bottom:12px; }
+
+  /* FOOTER */
+  footer {
+    text-align:center; padding:32px;
+    color:var(--muted); font-size:13px;
+    border-top:1px solid var(--border);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--bg3); border-radius:3px; }
+
+  @media(max-width:600px) {
+    nav { padding:0 16px; }
+    .hero { padding:40px 16px 24px; }
+    .filters { padding:14px 16px; }
+    .section { padding:20px 16px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap:12px; }
+    .search-wrap input { width:180px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo" onclick="closeModal();window.scrollTo(0,0)">HD<span>Flim</span></div>
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Film ara..." oninput="filterFilms()">
+  </div>
+  <div class="nav-count" id="navCount"></div>
+</nav>
+
+<div class="hero">
+  <h1>EN İYİ FİLMLER<br><span>HD KALİTEDE</span></h1>
+  <p>70'den fazla film, Türkçe dublaj ve altyazı seçenekleriyle.</p>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="setFilter('all',this)">Tümü</button>
+  <button class="filter-btn" onclick="setFilter('player',this)">▶ İzlenebilir</button>
+  <button class="filter-btn" onclick="setFilter('vidmoly',this)">Vidmoly</button>
+  <button class="filter-btn" onclick="setFilter('youtube',this)">YouTube</button>
+</div>
+
+<div class="section">
+  <div class="section-title" id="gridTitle">Tüm Filmler</div>
+  <div class="grid" id="filmGrid"></div>
+  <div class="empty" id="emptyMsg" style="display:none">
+    <div class="empty-icon">🎬</div>
+    <div>Film bulunamadı</div>
+  </div>
+</div>
+
+<footer>
+  HDFlim.net &copy; 2026 — Tüm hakları saklıdır.
+</footer>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modalBg" onclick="handleBgClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-player" id="modalPlayer"></div>
+    <div class="modal-body">
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+      <div id="sourcesWrap" style="display:none">
+        <div class="modal-label">Kaynak Seç</div>
+        <div class="source-btns" id="sourceBtns"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const FILMS = [{"title": "En Çok İzlenen Filmler", "url": "https://www.hdflim.net/en-cok-izlenen-filmler/", "poster": "", "player": "", "trailer": "", "embeds": []}, {"title": "28 Yıl Sonra", "url": "https://www.hdflim.net/28-yil-sonra-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/11/28-yil-sonra-1-180x270.webp", "player": "https://vidmoly.net/embed-2bva0izsf9vq.html", "trailer": "https://www.youtube.com/embed/S4ehyWPWrco", "embeds": ["https://vidmoly.net/embed-2bva0izsf9vq.html", "https://www.youtube.com/embed/S4ehyWPWrco"]}, {"title": "Glass", "url": "https://www.hdflim.net/glass-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/11/glass-180x270.webp", "player": "https://vidmoly.net/embed-vs5uscwxsx4s.html", "trailer": "https://www.youtube.com/embed/p6O1aAcQAKg", "embeds": ["https://vidmoly.net/embed-vs5uscwxsx4s.html", "https://www.youtube.com/embed/p6O1aAcQAKg"]}, {"title": "Can Dostlar", "url": "https://www.hdflim.net/can-dostlar-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/10/can-dostlar-180x270.webp", "player": "https://vidmoly.net/embed-vgoqbbioqd04.html", "trailer": "https://www.youtube.com/embed/3peUBnYhKP8", "embeds": ["https://vidmoly.net/embed-vgoqbbioqd04.html", "https://www.youtube.com/embed/3peUBnYhKP8"]}, {"title": "Melissa P.", "url": "https://www.hdflim.net/melissa-p-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/10/melissa-p-180x270.webp", "player": "https://www.youtube.com/embed/CJLSYlCeGUg", "trailer": "https://www.youtube.com/embed/CJLSYlCeGUg", "embeds": ["https://my.mail.ru/video/embed/7706774030430244965", "https://www.youtube.com/embed/CJLSYlCeGUg"]}, {"title": "Culpa Tuya", "url": "https://www.hdflim.net/culpa-tuya-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/culpa-tuya-180x270.webp", "player": "https://vidmoly.net/embed-ulj6acfp84xy.html", "trailer": "https://www.youtube.com/embed/8kufmWJuvdg", "embeds": ["https://vidmoly.net/embed-ulj6acfp84xy.html", "https://www.youtube.com/embed/8kufmWJuvdg"]}, {"title": "Jack Reacher", "url": "https://www.hdflim.net/jack-reacher-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/Jack-Reacher.webp", "player": "https://www.youtube.com/embed/kAbxn_F8lps", "trailer": "https://www.youtube.com/embed/kAbxn_F8lps", "embeds": ["https://ok.ru/videoembed/7247713798725", "https://www.youtube.com/embed/kAbxn_F8lps"]}, {"title": "The Unhealer", "url": "https://www.hdflim.net/the-unhealer-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/The-Unhealer-180x270.webp", "player": "https://vidmoly.net/embed-hgqwoqqmw0lf.html", "trailer": "https://www.youtube.com/embed/0MAFyBVB4q0", "embeds": ["https://vidmoly.net/embed-hgqwoqqmw0lf.html", "https://www.youtube.com/embed/0MAFyBVB4q0"]}, {"title": "Zihin Kafesi", "url": "https://www.hdflim.net/zihin-kafesi-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/mindcage-200x300-1-180x270.webp", "player": "https://vidmoly.net/embed-7t093vpqga3y.html", "trailer": "https://www.youtube.com/embed/sQlb5XL63r0", "embeds": ["https://vidmoly.net/embed-7t093vpqga3y.html", "https://www.youtube.com/embed/sQlb5XL63r0"]}, {"title": "Delibal", "url": "https://www.hdflim.net/delibal-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/delibal-180x270.jpg", "player": "https://vidmoly.net/embed-z664q7am65wr.html", "trailer": "https://www.youtube.com/embed/ibkWMKs2xsQ", "embeds": ["https://vidmoly.net/embed-z664q7am65wr.html", "https://www.youtube.com/embed/ibkWMKs2xsQ"]}, {"title": "Malefiz", "url": "https://www.hdflim.net/malefiz-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/malefiz-resim.webp", "player": "https://vidmoly.net/embed-6ii3bwtsbrb7.html", "trailer": "https://www.youtube.com/embed/LaArkjF7AnM", "embeds": ["https://vidmoly.net/embed-6ii3bwtsbrb7.html", "https://www.youtube.com/embed/LaArkjF7AnM"]}, {"title": "Jumanji Yeni Seviye", "url": "https://www.hdflim.net/jumanji-yeni-seviye-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/jumanji-yeni-seviye-180x270.jpg", "player": "https://vidmoly.net/embed-uerqdr4ih4na.html", "trailer": "https://www.youtube.com/embed/0MM25vfjoTw", "embeds": ["https://vidmoly.net/embed-uerqdr4ih4na.html", "https://www.youtube.com/embed/0MM25vfjoTw"]}, {"title": "Masumiyet", "url": "https://www.hdflim.net/masumiyet-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/masumiyet-180x270.jpg", "player": "https://vidmoly.net/embed-d22fp5yi5lbj.html", "trailer": "https://www.youtube.com/embed/Y1ToPu75f6Q", "embeds": ["https://vidmoly.net/embed-d22fp5yi5lbj.html", "https://www.youtube.com/embed/Y1ToPu75f6Q"]}, {"title": "3391 Kilometre", "url": "https://www.hdflim.net/3391-kilometre-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/08/3391-kilometre-180x270.jpg", "player": "https://vidmoly.net/embed-pw6xshdd9kj0.html", "trailer": "", "embeds": ["https://vidmoly.net/embed-pw6xshdd9kj0.html"]}, {"title": "Temel İçgüdü", "url": "https://www.hdflim.net/temel-icgudu-1ve2-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/07/Temel-Icgudu-1-180x263.webp", "player": "https://vidmoly.net/embed-ofitm2ladxor.html", "trailer": "https://www.youtube.com/embed/W7eAJ3f7C5c", "embeds": ["https://vidmoly.net/embed-ofitm2ladxor.html", "https://www.youtube.com/embed/W7eAJ3f7C5c"]}, {"title": "Ambulans", "url": "https://www.hdflim.net/ambulans-ambulance-2022-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/07/ambulans-180x270.jpg", "player": "https://vidmoly.net/embed-nsh8xpi4te4r.html", "trailer": "https://www.youtube.com/embed/eRdQWGG7fIU", "embeds": ["https://vidmoly.net/embed-nsh8xpi4te4r.html", "https://www.youtube.com/embed/eRdQWGG7fIU"]}, {"title": "Zor Ölüm 4", "url": "https://www.hdflim.net/zor-olum-4-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/07/zor-olum-4-180x270.jpg", "player": "https://vidmoly.net/embed-0hs9eyhwh8hs.html", "trailer": "https://www.youtube.com/embed/86ss__OIscQ", "embeds": ["https://vidmoly.net/embed-0hs9eyhwh8hs.html", "https://www.youtube.com/embed/86ss__OIscQ"]}, {"title": "Sisu", "url": "https://www.hdflim.net/sisu-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/07/sisu-180x270.jpg", "player": "https://vidmoly.net/embed-y8f816z8jwjg.html", "trailer": "https://www.youtube.com/embed/ziKvQo1WCRE", "embeds": ["https://vidmoly.net/embed-y8f816z8jwjg.html", "https://www.youtube.com/embed/ziKvQo1WCRE"]}, {"title": "Venom Son Dans 2024", "url": "https://www.hdflim.net/venom-son-dans-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/07/venom-son-dans-180x270.jpg", "player": "https://vidmoly.net/embed-ra3pmzn9dnbn.html", "trailer": "https://www.youtube.com/embed/tVqo-hIE4qA", "embeds": ["https://vidmoly.net/embed-ra3pmzn9dnbn.html", "https://www.youtube.com/embed/tVqo-hIE4qA"]}, {"title": "Maymunlar Cehennemi Yeni Krallık", "url": "https://www.hdflim.net/maymunlar-cehennemi-yeni-krallik-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/07/maymunlar-cehennemi-yeni-krallik-180x270.jpg", "player": "https://vidmoly.biz/embed-l6s6huofwxw1.html", "trailer": "https://www.youtube.com/embed/Q45wW7AmgC0", "embeds": ["https://vidmoly.biz/embed-l6s6huofwxw1.html", "https://www.youtube.com/embed/Q45wW7AmgC0"]}, {"title": "Hotel Desire 2011", "url": "https://www.hdflim.net/hotel-desire-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/06/hotel-desire-180x270.jpg", "player": "https://vidmoly.net/embed-06yxdszi8amv.html", "trailer": "https://www.youtube.com/embed/I5KnIbjHUFE", "embeds": ["https://vidmoly.net/embed-06yxdszi8amv.html", "https://www.youtube.com/embed/I5KnIbjHUFE"]}, {"title": "Tetikçi 2 Yüksek Gerilim", "url": "https://www.hdflim.net/tetikci-2-yuksek-gerilim-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/06/tetikci-2-yuksek-gerilim-180x270.jpg", "player": "https://vidmoly.net/embed-hm7tw2q2gxg4.html", "trailer": "https://www.youtube.com/embed/t2koYVqwzT4", "embeds": ["https://vidmoly.net/embed-hm7tw2q2gxg4.html", "https://www.youtube.com/embed/t2koYVqwzT4"]}, {"title": "Anahtar", "url": "https://www.hdflim.net/anahtar-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/anahtar-180x270.webp", "player": "https://www.youtube.com/embed/ss1x2aZ58E4", "trailer": "https://www.youtube.com/embed/ss1x2aZ58E4", "embeds": ["https://my.mail.ru/video/embed/7706774030430246807", "https://www.youtube.com/embed/ss1x2aZ58E4"]}, {"title": "Evet", "url": "https://www.hdflim.net/evet-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/evet-180x270.webp", "player": "https://www.youtube.com/embed/kWFRkN5SgmY", "trailer": "https://www.youtube.com/embed/kWFRkN5SgmY", "embeds": ["https://my.mail.ru/video/embed/7706774030430245073", "https://www.youtube.com/embed/kWFRkN5SgmY"]}, {"title": "Julia X", "url": "https://www.hdflim.net/julia-x-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/julia-x-180x270.webp", "player": "https://www.youtube.com/embed/hSY-zhNfWd0", "trailer": "https://www.youtube.com/embed/hSY-zhNfWd0", "embeds": ["https://my.mail.ru/video/embed/7706774030430253568", "https://www.youtube.com/embed/hSY-zhNfWd0"]}, {"title": "Odotus", "url": "https://www.hdflim.net/odotus-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/odotus-180x270.webp", "player": "https://www.youtube.com/embed/epUC1zPAaR0", "trailer": "https://www.youtube.com/embed/epUC1zPAaR0", "embeds": ["https://my.mail.ru/video/embed/7706774030430253779", "https://www.youtube.com/embed/epUC1zPAaR0"]}, {"title": "Nurse 3-D", "url": "https://www.hdflim.net/nurse-3-d-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/nurse-3-d-180x270.webp", "player": "https://www.youtube.com/embed/23tCUhMITTc", "trailer": "https://www.youtube.com/embed/23tCUhMITTc", "embeds": ["https://my.mail.ru/video/embed/7706774030430253942", "https://www.youtube.com/embed/23tCUhMITTc"]}, {"title": "Anne", "url": "https://www.hdflim.net/anne-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/anne-180x270.webp", "player": "https://www.youtube.com/embed/hctApy_i-qg", "trailer": "https://www.youtube.com/embed/hctApy_i-qg", "embeds": ["https://my.mail.ru/video/embed/7706774030430253933", "https://www.youtube.com/embed/hctApy_i-qg"]}, {"title": "Tetro", "url": "https://www.hdflim.net/tetro-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/tetro-180x270.webp", "player": "https://www.youtube.com/embed/z_i1wzFkO5A", "trailer": "https://www.youtube.com/embed/z_i1wzFkO5A", "embeds": ["https://my.mail.ru/video/embed/7706774030430254089", "https://www.youtube.com/embed/z_i1wzFkO5A"]}, {"title": "Beni Unutma", "url": "https://www.hdflim.net/beni-unutma-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/beni-unutma-180x270.webp", "player": "https://www.youtube.com/embed/AFQuK5jOpKU", "trailer": "https://www.youtube.com/embed/AFQuK5jOpKU", "embeds": ["https://my.mail.ru/video/embed/7706774030430254145", "https://www.youtube.com/embed/AFQuK5jOpKU"]}, {"title": "Ani Saldırı", "url": "https://www.hdflim.net/ani-saldiri-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/ani-saldiri-180x270.webp", "player": "https://vidmoly.net/embed-1hwesps0o4gg.html", "trailer": "https://www.youtube.com/embed/hzyOsNyDkbM", "embeds": ["https://vidmoly.net/embed-1hwesps0o4gg.html", "https://www.youtube.com/embed/hzyOsNyDkbM"]}, {"title": "Düğün Tarihi", "url": "https://www.hdflim.net/the-wedding-date-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/kiralik-sevgili-1-180x270.webp", "player": "https://vidmoly.net/embed-xqvbext017n8.html", "trailer": "https://www.youtube.com/embed/DS1bOLtMNfc", "embeds": ["https://vidmoly.net/embed-xqvbext017n8.html", "https://www.youtube.com/embed/DS1bOLtMNfc"]}, {"title": "Madame Web", "url": "https://www.hdflim.net/madame-web-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/madame-web-180x270.webp", "player": "https://vidmoly.net/embed-hbe3fye32687.html", "trailer": "https://www.youtube.com/embed/ZTycQKub30c", "embeds": ["https://vidmoly.net/embed-hbe3fye32687.html", "https://www.youtube.com/embed/ZTycQKub30c"]}, {"title": "Kiralık Sevgili", "url": "https://www.hdflim.net/kiralik-sevgili-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/kiralik-sevgili-180x270.webp", "player": "https://www.youtube.com/embed/euwBlSZVrtQ", "trailer": "https://www.youtube.com/embed/euwBlSZVrtQ", "embeds": ["https://dzen.ru/embed/vwrAdPv75mCg?from_block=partner&from=zen&mute=0&autoplay=0&tv=0", "https://www.youtube.com/embed/euwBlSZVrtQ"]}, {"title": "Komşu Kızı", "url": "https://www.hdflim.net/komsu-kizi-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/komsu-kizi-180x270.webp", "player": "https://vidmoly.net/embed-yyagcdvgdnbb.html", "trailer": "https://www.youtube.com/embed/0rD3Qkh-238", "embeds": ["https://vidmoly.net/embed-yyagcdvgdnbb.html", "https://www.youtube.com/embed/0rD3Qkh-238"]}, {"title": "Kız", "url": "https://www.hdflim.net/kiz-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/kiz-180x270.webp", "player": "https://vidmoly.net/embed-50splwemhy2b.html", "trailer": "https://www.youtube.com/embed/lTrCpkJwckY", "embeds": ["https://vidmoly.net/embed-50splwemhy2b.html", "https://www.youtube.com/embed/lTrCpkJwckY"]}, {"title": "Masumiyetin İntiharı", "url": "https://www.hdflim.net/masumiyetin-intihari-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/masumiyetin-intihari-180x270.webp", "player": "https://www.youtube.com/embed/2Xow8i4otaw", "trailer": "https://www.youtube.com/embed/2Xow8i4otaw", "embeds": ["https://ok.ru/videoembed/7256253991549?nochat=1", "https://www.youtube.com/embed/2Xow8i4otaw"]}, {"title": "6 Saat Uzakta", "url": "https://www.hdflim.net/6-saat-uzakta-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/6-saat-uzakta-180x270.webp", "player": "https://www.youtube.com/embed/G_erAwEUNWc?si=qoOnT34iIgYHwquT", "trailer": "https://www.youtube.com/embed/G_erAwEUNWc?si=qoOnT34iIgYHwquT", "embeds": ["https://www.youtube.com/embed/G_erAwEUNWc?si=qoOnT34iIgYHwquT", "https://www.youtube.com/embed/Z9rcVX8GZww"]}, {"title": "Kasırga Avcısı", "url": "https://www.hdflim.net/kasirga-avcisi-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/supercell-180x270.webp", "player": "https://vidmoly.net/embed-83u0gr3dhfht.html", "trailer": "https://www.youtube.com/embed/Te4pM0uzYIc", "embeds": ["https://vidmoly.net/embed-83u0gr3dhfht.html", "https://www.youtube.com/embed/Te4pM0uzYIc"]}, {"title": "Kasırgada Vurgun", "url": "https://www.hdflim.net/kasirgada-vurgun-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/kasirgada-vurgun-180x270.webp", "player": "https://vidmoly.net/embed-o3os7c18l3tq.html", "trailer": "https://www.youtube.com/embed/KP4sl0_pN68", "embeds": ["https://vidmoly.net/embed-o3os7c18l3tq.html", "https://www.youtube.com/embed/KP4sl0_pN68"]}, {"title": "Final Girl", "url": "https://www.hdflim.net/final-girl-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/final-girl-180x270.webp", "player": "https://vidmoly.net/embed-ktr79g7h6l5j.html", "trailer": "https://www.youtube.com/embed/AiWLKmlbF74", "embeds": ["https://vidmoly.net/embed-ktr79g7h6l5j.html", "https://www.youtube.com/embed/AiWLKmlbF74"]}, {"title": "Gülizar", "url": "https://www.hdflim.net/gulizar-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/gulizar-180x270.webp", "player": "https://vidmoly.net/embed-3k8pylclfktv.html", "trailer": "", "embeds": ["https://vidmoly.net/embed-3k8pylclfktv.html"]}, {"title": "Kralın Kızı", "url": "https://www.hdflim.net/kralin-kizi-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/kralin-kizi-180x270.webp", "player": "https://vidmoly.net/embed-xl01p0iv41b4.html", "trailer": "https://www.youtube.com/embed/0yuwbPwGNEw", "embeds": ["https://vidmoly.net/embed-xl01p0iv41b4.html", "https://www.youtube.com/embed/0yuwbPwGNEw"]}, {"title": "Cinsellik", "url": "https://www.hdflim.net/cinsellik-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/cinsellik-180x270.webp", "player": "https://vidmoly.net/embed-zyjuea0xgv2x.html", "trailer": "https://www.youtube.com/embed/8pA-dnr8jUE", "embeds": ["https://vidmoly.net/embed-zyjuea0xgv2x.html", "https://www.youtube.com/embed/8pA-dnr8jUE"]}, {"title": "Zemheri", "url": "https://www.hdflim.net/zemheri-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/dead-of-winter-180x270.webp", "player": "https://vidmoly.net/embed-dcq2dgup0bst.html", "trailer": "https://www.youtube.com/embed/BHh0YfMYyFo", "embeds": ["https://vidmoly.net/embed-dcq2dgup0bst.html", "https://www.youtube.com/embed/BHh0YfMYyFo"]}, {"title": "Banker", "url": "https://www.hdflim.net/banker-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/the-banker-180x270.webp", "player": "https://vidmoly.net/embed-ch5ekr6h2b0d.html", "trailer": "https://www.youtube.com/embed/J_-nk9-sMus", "embeds": ["https://vidmoly.net/embed-ch5ekr6h2b0d.html", "https://www.youtube.com/embed/J_-nk9-sMus"]}, {"title": "Direniş Bankeri", "url": "https://www.hdflim.net/direnis-bankeri-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/direnis-bankeri-180x270.webp", "player": "https://vidmoly.net/embed-beoounhivvga.html", "trailer": "https://www.youtube.com/embed/i7bKkoT3p4I", "embeds": ["https://vidmoly.net/embed-beoounhivvga.html", "https://www.youtube.com/embed/i7bKkoT3p4I"]}, {"title": "Cumhuriyet'in Kartalları", "url": "https://www.hdflim.net/cumhuriyetin-kartallari-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/cumhuriyetin-kartallari-180x270.webp", "player": "https://vidmoly.net/embed-qfc7lir97pua.html", "trailer": "https://www.youtube.com/embed/GU93JJ5NUho", "embeds": ["https://vidmoly.net/embed-qfc7lir97pua.html", "https://www.youtube.com/embed/GU93JJ5NUho"]}, {"title": "Gölge Avı", "url": "https://www.hdflim.net/golge-avi-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/04/golge-avi-180x270.webp", "player": "https://vidmoly.net/embed-zc958g2vj5jd.html", "trailer": "https://www.youtube.com/embed/bwEQ20rN42s", "embeds": ["https://vidmoly.net/embed-zc958g2vj5jd.html", "https://www.youtube.com/embed/bwEQ20rN42s"]}, {"title": "Seven Veils", "url": "https://www.hdflim.net/seven-veils-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/03/seven-veils-180x270.webp", "player": "https://vidmoly.net/embed-26a4hdgyyogk.html", "trailer": "https://www.youtube.com/embed/CnUDGWiODIU", "embeds": ["https://vidmoly.net/embed-26a4hdgyyogk.html", "https://www.youtube.com/embed/CnUDGWiODIU"]}, {"title": "Sesini Duyur", "url": "https://www.hdflim.net/sesini-duyur-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2026/03/sesini-duyur-180x270.webp", "player": "https://www.youtube.com/embed/BBntfOIjsRw", "trailer": "https://www.youtube.com/embed/BBntfOIjsRw", "embeds": ["https://ok.ru/videoembed/32514443919?nochat=1", "https://www.youtube.com/embed/BBntfOIjsRw"]}, {"title": "Kirpi Sonic 3", "url": "https://www.hdflim.net/kirpi-sonic-3-izle/", "poster": "https://www.hdflim.net/wp-content/uploads/2025/07/kirpi-sonic-3-180x270.jpg", "player": "https://www.youtube.com/embed/uQpNPnnyBG4", "trailer": "https://www.youtube.com/embed/uQpNPnnyBG4", "embeds": ["https://www.youtube.com/embed/uQpNPnnyBG4"]}, {"title": "Fetih 1453", "url": "https://www.hdflim.net/fetih-1453-izle/", "poster": "", "player": "https://www.youtube.com/embed/nSmEMqC6kUs", "trailer": "https://www.youtube.com/embed/nSmEMqC6kUs", "embeds": ["https://ok.ru/videoembed/6899434814", "https://www.youtube.com/embed/nSmEMqC6kUs"]}, {"title": "Joker", "url": "https://www.hdflim.net/joker-izle/", "poster": "", "player": "https://www.youtube.com/embed/eQ-NqkrWLx0", "trailer": "https://www.youtube.com/embed/eQ-NqkrWLx0", "embeds": ["https://www.youtube.com/embed/eQ-NqkrWLx0"]}, {"title": "İntikam Vakti", "url": "https://www.hdflim.net/intikam-vakti-izle/", "poster": "", "player": "https://vidmoly.net/embed-ogsd9sedd6j2.html", "trailer": "https://www.youtube.com/embed/W4OTAOhPOLk", "embeds": ["https://vidmoly.net/embed-ogsd9sedd6j2.html", "https://www.youtube.com/embed/W4OTAOhPOLk"]}, {"title": "Benimle Ol", "url": "https://www.hdflim.net/benimle-ol-izle/", "poster": "", "player": "https://vidmoly.net/embed-8dioqjv0uwqm.html", "trailer": "https://www.youtube.com/embed/qbAx83VcpL0", "embeds": ["https://vidmoly.net/embed-8dioqjv0uwqm.html", "https://www.youtube.com/embed/qbAx83VcpL0"]}, {"title": "Kutsal Damacana Dracoola", "url": "https://www.hdflim.net/kutsal-damacana-dracoola-izle/", "poster": "", "player": "https://vidmoly.net/embed-lhbxzhkigf27.html", "trailer": "", "embeds": ["https://vidmoly.net/embed-lhbxzhkigf27.html"]}, {"title": "Bir Ömrün Sonbaharı", "url": "https://www.hdflim.net/bir-omrun-sonbahari-izle/", "poster": "", "player": "https://vidmoly.net/embed-s9a718l0iuq0.html", "trailer": "https://www.youtube.com/embed/XSo-1VE7gUE", "embeds": ["https://vidmoly.net/embed-s9a718l0iuq0.html", "https://www.youtube.com/embed/XSo-1VE7gUE"]}, {"title": "Karakomik Filmler Serisi", "url": "https://www.hdflim.net/karakomik-filmler-serisi-izle/", "poster": "", "player": "https://www.youtube.com/embed/xhY0cdE5wj0", "trailer": "https://www.youtube.com/embed/xhY0cdE5wj0", "embeds": ["https://odnoklassniki.ru/videoembed/7469847743057", "https://www.youtube.com/embed/xhY0cdE5wj0"]}, {"title": "Kolpaçino 4 4'lük", "url": "https://www.hdflim.net/kolpacino-4-4luk-izle/", "poster": "", "player": "https://vidmoly.net/embed-t108wchx8r4o.html", "trailer": "", "embeds": ["https://vidmoly.net/embed-t108wchx8r4o.html"]}, {"title": "Ben O Değilim", "url": "https://www.hdflim.net/ben-o-degilim-izle/", "poster": "", "player": "https://www.youtube.com/embed/Kg4npSwDt1o", "trailer": "https://www.youtube.com/embed/Kg4npSwDt1o", "embeds": ["https://www.youtube.com/embed/Kg4npSwDt1o"]}];
+
+const VALID_FILMS = FILMS.filter(f => f.title && f.player);
+let currentFilter = 'all';
+let currentSearch = '';
+let activeSource = null;
+
+function getSourceLabel(url) {
+  if (!url) return '';
+  if (url.includes('vidmoly')) return '🎬 Vidmoly';
+  if (url.includes('youtube')) return '▶ YouTube';
+  if (url.includes('mail.ru')) return '📺 Mail.ru';
+  if (url.includes('ok.ru') || url.includes('odnoklassniki')) return '📺 OK.ru';
+  if (url.includes('dzen.ru')) return '📺 Dzen';
+  return '📺 Kaynak';
+}
+
+function filteredFilms() {
+  return VALID_FILMS.filter(f => {
+    const matchSearch = !currentSearch || f.title.toLowerCase().includes(currentSearch.toLowerCase());
+    const matchFilter =
+      currentFilter === 'all' ? true :
+      currentFilter === 'player' ? !!f.player :
+      currentFilter === 'vidmoly' ? f.embeds.some(e => e.includes('vidmoly')) :
+      currentFilter === 'youtube' ? f.embeds.some(e => e.includes('youtube')) :
+      true;
+    return matchSearch && matchFilter;
+  });
+}
+
+function renderGrid() {
+  const films = filteredFilms();
+  const grid = document.getElementById('filmGrid');
+  const empty = document.getElementById('emptyMsg');
+  const title = document.getElementById('gridTitle');
+  const navCount = document.getElementById('navCount');
+
+  navCount.textContent = `${films.length} film`;
+  title.textContent = currentSearch ? `"${currentSearch}" için sonuçlar` :
+    currentFilter === 'all' ? 'Tüm Filmler' :
+    currentFilter === 'player' ? 'İzlenebilir Filmler' :
+    currentFilter === 'vidmoly' ? 'Vidmoly Filmleri' : 'YouTube Filmleri';
+
+  if (!films.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = films.map((f, i) => {
+    const hasPlayer = !!f.player;
+    const posterHtml = f.poster
+      ? `<img class="card-poster" src="${f.poster}" alt="${f.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const placeholderStyle = f.poster ? 'display:none' : '';
+    return `
+    <div class="card ${!hasPlayer ? 'no-player' : ''}" onclick="${hasPlayer ? `openFilm(${i})` : ''}" title="${f.title}">
+      ${posterHtml}
+      <div class="card-poster-placeholder" style="${placeholderStyle}">🎬</div>
+      <div class="card-overlay">
+        <button class="play-btn">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <div class="card-info">
+        <div class="card-title">${f.title}</div>
+        <div class="card-meta">
+          ${hasPlayer ? '<span class="badge badge-play">▶ İzle</span>' : '<span class="badge" style="opacity:.4">Yakında</span>'}
+          <span class="badge badge-hd">HD</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openFilm(globalIdx) {
+  const films = filteredFilms();
+  // Find actual film from filtered
+  const f = films[globalIdx] || VALID_FILMS[globalIdx];
+  if (!f || !f.player) return;
+
+  document.getElementById('modalTitle').textContent = f.title;
+  document.getElementById('modalMeta').innerHTML = `
+    <span>🎬 HD Kalite</span>
+    <span>📺 ${f.embeds.length} kaynak</span>
+    ${f.trailer ? '<span>🎞 Fragman mevcut</span>' : ''}
+  `;
+
+  setModalSrc(f.player, f);
+
+  // Source buttons
+  const sourcesWrap = document.getElementById('sourcesWrap');
+  const sourceBtns = document.getElementById('sourceBtns');
+  const validEmbeds = f.embeds.filter(e => e && e.startsWith('http'));
+  if (validEmbeds.length > 1) {
+    sourcesWrap.style.display = 'block';
+    sourceBtns.innerHTML = validEmbeds.map((e, i) =>
+      `<button class="source-btn ${i===0?'active':''}" onclick="switchSource('${e}', this)">${getSourceLabel(e)}</button>`
+    ).join('');
+  } else {
+    sourcesWrap.style.display = 'none';
+  }
+
+  document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function setModalSrc(src, film) {
+  document.getElementById('modalPlayer').innerHTML =
+    `<iframe src="${src}" allowfullscreen allow="autoplay; encrypted-media" referrerpolicy="no-referrer"></iframe>`;
+}
+
+function switchSource(src, btn) {
+  document.querySelectorAll('.source-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('modalPlayer').innerHTML =
+    `<iframe src="${src}" allowfullscreen allow="autoplay; encrypted-media" referrerpolicy="no-referrer"></iframe>`;
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  document.getElementById('modalPlayer').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+function handleBgClick(e) {
+  if (e.target === document.getElementById('modalBg')) closeModal();
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function filterFilms() {
+  currentSearch = document.getElementById('searchInput').value;
+  renderGrid();
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// Re-map openFilm to use index in filtered array
+const origRenderGrid = renderGrid;
+window.renderGrid = function() {
+  const films = filteredFilms();
+  const grid = document.getElementById('filmGrid');
+  const empty = document.getElementById('emptyMsg');
+  const title = document.getElementById('gridTitle');
+  const navCount = document.getElementById('navCount');
+
+  navCount.textContent = `${films.length} film`;
+  title.textContent = currentSearch ? `"${currentSearch}" için sonuçlar` :
+    currentFilter === 'all' ? 'Tüm Filmler' :
+    currentFilter === 'player' ? 'İzlenebilir Filmler' :
+    currentFilter === 'vidmoly' ? 'Vidmoly Filmleri' : 'YouTube Filmleri';
+
+  if (!films.length) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = films.map((f, i) => {
+    const hasPlayer = !!f.player;
+    const posterHtml = f.poster
+      ? `<img class="card-poster" src="${f.poster}" alt="${f.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const placeholderStyle = f.poster ? 'display:none' : '';
+    return `
+    <div class="card ${!hasPlayer ? 'no-player' : ''}" onclick="${hasPlayer ? `openFilmByIndex(${i})` : ''}" title="${f.title}">
+      ${posterHtml}
+      <div class="card-poster-placeholder" style="${placeholderStyle}">🎬</div>
+      <div class="card-overlay">
+        <button class="play-btn">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <div class="card-info">
+        <div class="card-title">${f.title}</div>
+        <div class="card-meta">
+          ${hasPlayer ? '<span class="badge badge-play">▶ İzle</span>' : '<span class="badge" style="opacity:.4">Yakında</span>'}
+          <span class="badge badge-hd">HD</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.openFilmByIndex = function(i) {
+  const f = filteredFilms()[i];
+  if (!f || !f.player) return;
+
+  document.getElementById('modalTitle').textContent = f.title;
+  document.getElementById('modalMeta').innerHTML = `
+    <span>🎬 HD Kalite</span>
+    <span>📺 ${f.embeds.length} kaynak</span>
+    ${f.trailer ? '<span>🎞 Fragman mevcut</span>' : ''}
+  `;
+
+  document.getElementById('modalPlayer').innerHTML =
+    `<iframe src="${f.player}" allowfullscreen allow="autoplay; encrypted-media" referrerpolicy="no-referrer"></iframe>`;
+
+  const sourcesWrap = document.getElementById('sourcesWrap');
+  const sourceBtns = document.getElementById('sourceBtns');
+  const validEmbeds = f.embeds.filter(e => e && e.startsWith('http'));
+  if (validEmbeds.length > 1) {
+    sourcesWrap.style.display = 'block';
+    sourceBtns.innerHTML = validEmbeds.map((e, i) =>
+      `<button class="source-btn ${i===0?'active':''}" onclick="switchSource('${e}', this)">${getSourceLabel(e)}</button>`
+    ).join('');
+  } else {
+    sourcesWrap.style.display = 'none';
+  }
+
+  document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+};
+
+renderGrid();
+</script>
+</body>
+</html>
