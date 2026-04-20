@@ -534,7 +534,6 @@ function playAd(){
   cd.textContent=AD_SECS+'sn';
 
   // Video sıfırla
-  vid.muted=true;
   vid.currentTime=0;
 
   // Ses açma butonu göster
@@ -566,13 +565,18 @@ function playAd(){
     window.open(AD_LINK,'_blank');
   };
 
-  // Oynat
+  // Kullanıcı film kartına tıkladı = etkileşim var, sesli oynat
+  vid.muted=false;
   let playPromise=vid.play();
   if(playPromise!==undefined){
     playPromise.then(()=>{
-      // Başarıyla başladı, ses açma butonu göster
+      // Sesli başladı, unmute butonunu gizle
+      const unmuteBtn=document.getElementById('adUnmute');
+      if(unmuteBtn) unmuteBtn.style.display='none';
     }).catch(()=>{
-      // Autoplay engellendi
+      // Sesli başlatılamadı, sessiz dene
+      vid.muted=true;
+      vid.play().catch(()=>{});
     });
   }
 
