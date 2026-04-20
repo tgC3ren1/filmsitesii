@@ -3,7 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HD Film İzle</title>
+
+<!-- SEO Meta Tags -->
+<title>HD Film İzle | Türkçe Dublaj ve Altyazılı Full HD Filmler</title>
+<meta name="description" content="En yeni filmleri Türkçe dublaj ve altyazı seçenekleriyle HD kalitede ücretsiz izle. Aksiyon, korku, komedi, drama ve daha fazlası.">
+<meta name="keywords" content="hd film izle, türkçe dublaj film izle, full hd film izle, online film izle, türkçe altyazılı film, ücretsiz film izle, aksiyon filmleri, korku filmleri, komedi filmleri">
+<meta name="robots" content="index, follow">
+<meta name="author" content="HDFlim">
+<meta name="language" content="Turkish">
+<meta name="revisit-after" content="3 days">
+<link rel="canonical" href="https://www.hdflim.net/">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.hdflim.net/">
+<meta property="og:title" content="HD Film İzle | Türkçe Dublaj ve Altyazılı Full HD Filmler">
+<meta property="og:description" content="En yeni filmleri Türkçe dublaj ve altyazı seçenekleriyle HD kalitede ücretsiz izle.">
+<meta property="og:image" content="https://i.hizliresim.com/o12vacn.png">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="HDFlim">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="HD Film İzle | Türkçe Dublaj ve Altyazılı Full HD Filmler">
+<meta name="twitter:description" content="En yeni filmleri Türkçe dublaj ve altyazı seçenekleriyle HD kalitede ücretsiz izle.">
+<meta name="twitter:image" content="https://i.hizliresim.com/o12vacn.png">
+
+<!-- Schema.org WebSite -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "HDFlim",
+  "url": "https://www.hdflim.net/",
+  "description": "Türkçe dublaj ve altyazılı HD film izleme sitesi",
+  "inLanguage": "tr",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://www.hdflim.net/?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- Schema.org Organization -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "HDFlim",
+  "url": "https://www.hdflim.net/",
+  "logo": "https://i.hizliresim.com/o12vacn.png"
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--card:#14141c;--border:#ffffff0f;
@@ -149,6 +204,19 @@ footer{text-align:center;padding:28px;color:var(--muted);font-size:12px;border-t
 </style>
 </head>
 <body>
+<script>
+// Sayfa yüklenince reklam videosunu arka planda önceden yükle
+window.addEventListener('load', function(){
+  const vid = document.getElementById('adVideo');
+  if(vid){
+    vid.load();
+    // Sessizce birkaç saniye oynat ve durdur - buffer için
+    vid.muted=true;
+    let preloadPlay = vid.play();
+    if(preloadPlay) preloadPlay.then(()=>{ setTimeout(()=>{ vid.pause(); vid.currentTime=0; }, 500); }).catch(()=>{});
+  }
+});
+</script>
 
 <nav>
   <div class="logo" onclick="setCategory('all')">
@@ -211,7 +279,19 @@ footer{text-align:center;padding:28px;color:var(--muted);font-size:12px;border-t
   <div class="pagination" id="pagination"></div>
 </div>
 
-<footer>HD Film İzle &copy; 2026 — Tüm hakları saklıdır.</footer>
+<footer>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-bottom:12px;font-size:12px;">
+    <a onclick="setCategory('aksiyon')" style="color:var(--muted);cursor:pointer;text-decoration:none;">💥 Aksiyon Filmleri</a>
+    <a onclick="setCategory('korku')" style="color:var(--muted);cursor:pointer;text-decoration:none;">👻 Korku Filmleri</a>
+    <a onclick="setCategory('komedi')" style="color:var(--muted);cursor:pointer;text-decoration:none;">😂 Komedi Filmleri</a>
+    <a onclick="setCategory('romantik')" style="color:var(--muted);cursor:pointer;text-decoration:none;">💕 Romantik Filmler</a>
+    <a onclick="setCategory('drama')" style="color:var(--muted);cursor:pointer;text-decoration:none;">🎭 Drama Filmleri</a>
+    <a onclick="setCategory('bilimkurgu')" style="color:var(--muted);cursor:pointer;text-decoration:none;">🚀 Bilim Kurgu Filmleri</a>
+    <a onclick="setCategory('yerli')" style="color:var(--muted);cursor:pointer;text-decoration:none;">🇹🇷 Yerli Filmler</a>
+  </div>
+  <p>HD Film İzle &copy; 2026 — Tüm filmleri Türkçe dublaj ve altyazı seçenekleriyle HD kalitede izle.</p>
+  <p style="margin-top:6px;font-size:11px;opacity:.5;">Türkçe Dublaj Film İzle | Full HD Film İzle | Online Film İzle | Ücretsiz Film İzle</p>
+</footer>
 
 <div class="modal-bg" id="modalBg" onclick="bgClick(event)">
   <div class="modal">
@@ -222,7 +302,7 @@ footer{text-align:center;padding:28px;color:var(--muted);font-size:12px;border-t
           <span class="ad-label">📢 Reklam</span>
           <span class="ad-countdown" id="adCountdown">15sn</span>
         </div>
-        <video id="adVideo" playsinline muted preload="auto" style="width:100%;height:100%;object-fit:contain;cursor:pointer;display:block;flex:1;background:#000"></video>
+        <video id="adVideo" src="https://zbhpay.com/cokpardon.mp4" playsinline muted preload="auto" style="width:100%;height:100%;object-fit:contain;cursor:pointer;display:block;flex:1;background:#000"></video>
         <button class="ad-skip" id="adSkip">15 sn sonra geçilebilir</button>
       </div>
     </div>
@@ -335,6 +415,28 @@ function render(){
 
   renderPagination(totalPages);
   window.scrollTo({top:0,behavior:'smooth'});
+
+  // Schema.org ItemList - arama motorları için
+  const schema={
+    "@context":"https://schema.org",
+    "@type":"ItemList",
+    "name":document.getElementById('secTitle').querySelector('span').textContent,
+    "numberOfItems":total,
+    "itemListElement":pageFilms.slice(0,10).map((f,i)=>({
+      "@type":"ListItem",
+      "position":start+i+1,
+      "item":{
+        "@type":"Movie",
+        "name":f.t,
+        "image":f.p||"https://i.hizliresim.com/o12vacn.png",
+        "inLanguage":"tr",
+        "url":"https://www.hdflim.net/"
+      }
+    }))
+  };
+  let schemaEl=document.getElementById('schemaItemList');
+  if(!schemaEl){schemaEl=document.createElement('script');schemaEl.type='application/ld+json';schemaEl.id='schemaItemList';document.head.appendChild(schemaEl);}
+  schemaEl.textContent=JSON.stringify(schema);
 }
 
 function renderPagination(totalPages){
@@ -389,6 +491,12 @@ function openFilm(i){
   document.getElementById('modalTitle').textContent=f.t;
   document.getElementById('modalMeta').innerHTML=
     `<span>🎬 HD Kalite</span><span>${CAT_NAMES[f.cat]||''}</span><span>📺 ${f.e.length} kaynak</span>`;
+  // Dinamik meta güncelle (SEO + sosyal paylaşım için)
+  document.title=f.t+' izle | HDFlim';
+  document.querySelector('meta[name="description"]').content=f.t+' filmini Türkçe dublaj veya altyazı ile HD kalitede ücretsiz izle.';
+  document.querySelector('meta[property="og:title"]').content=f.t+' izle | HDFlim';
+  document.querySelector('meta[property="og:description"]').content=f.t+' filmini HD kalitede izle.';
+  if(f.p){document.querySelector('meta[property="og:image"]').content=f.p;}
   const valid=f.e.filter(e=>e&&e.startsWith('http'));
   const sw=document.getElementById('sourcesWrap');
   if(valid.length>1){
@@ -425,10 +533,9 @@ function playAd(){
   // Sayaç sıfırla
   cd.textContent=AD_SECS+'sn';
 
-  // Video ayarla - yeni src ata (cache bypass)
+  // Video sıfırla - src değiştirme, önceden yüklü
   vid.muted=true;
-  vid.src='https://zbhpay.com/cokpardon.mp4?t='+Date.now();
-  vid.load();
+  vid.currentTime=0;
 
   // Video tıklanınca reklam linkine git
   vid.onclick=function(e){
@@ -465,7 +572,7 @@ function skipAd(){
   clearInterval(adInterval);
   const vid=document.getElementById('adVideo');
   vid.pause();
-  vid.src=''; // video durdur ve belleği serbest bırak
+  vid.currentTime=0;
   document.getElementById('adOverlay').style.display='none';
   const iframe=document.createElement('iframe');
   iframe.src=pendingSrc;
@@ -485,10 +592,12 @@ function closeModal(){
   clearInterval(adInterval);
   document.getElementById('modalBg').classList.remove('open');
   document.body.style.overflow='';
+  document.title='HD Film İzle | Türkçe Dublaj ve Altyazılı Full HD Filmler';
+  document.querySelector('meta[name="description"]').content='En yeni filmleri Türkçe dublaj ve altyazı seçenekleriyle HD kalitede ücretsiz izle.';
   // iframe ve video temizle
   document.querySelectorAll('#modalPlayer iframe').forEach(el=>el.remove());
   const vid=document.getElementById('adVideo');
-  vid.pause(); vid.src=''; vid.currentTime=0;
+  vid.pause(); vid.currentTime=0;
   // Overlay sıfırla ama gizle (bir sonraki açılışa hazır)
   const overlay=document.getElementById('adOverlay');
   overlay.style.display='none';
