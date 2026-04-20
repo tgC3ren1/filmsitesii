@@ -533,9 +533,32 @@ function playAd(){
   // Sayaç sıfırla
   cd.textContent=AD_SECS+'sn';
 
-  // Video sıfırla - src değiştirme, önceden yüklü
+  // Video sıfırla
   vid.muted=true;
   vid.currentTime=0;
+
+  // Ses açma butonu göster
+  let unmuteBtn=document.getElementById('adUnmute');
+  if(!unmuteBtn){
+    unmuteBtn=document.createElement('button');
+    unmuteBtn.id='adUnmute';
+    unmuteBtn.style.cssText='position:absolute;top:14px;right:14px;z-index:53;background:rgba(0,0,0,0.7);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;';
+    unmuteBtn.textContent='🔇 Sesi Aç';
+    document.getElementById('adOverlay').appendChild(unmuteBtn);
+  }
+  unmuteBtn.style.display='block';
+  unmuteBtn.onclick=function(e){
+    e.stopPropagation();
+    if(vid.muted){
+      vid.muted=false;
+      unmuteBtn.textContent='🔊 Ses Açık';
+      unmuteBtn.style.background='rgba(230,57,70,0.8)';
+    } else {
+      vid.muted=true;
+      unmuteBtn.textContent='🔇 Sesi Aç';
+      unmuteBtn.style.background='rgba(0,0,0,0.7)';
+    }
+  };
 
   // Video tıklanınca reklam linkine git
   vid.onclick=function(e){
@@ -546,8 +569,10 @@ function playAd(){
   // Oynat
   let playPromise=vid.play();
   if(playPromise!==undefined){
-    playPromise.catch(()=>{
-      // Autoplay engellendi - kullanıcı etkileşimi bekliyoruz, yine de sayaç başlasın
+    playPromise.then(()=>{
+      // Başarıyla başladı, ses açma butonu göster
+    }).catch(()=>{
+      // Autoplay engellendi
     });
   }
 
@@ -572,8 +597,11 @@ function skipAd(){
   clearInterval(adInterval);
   const vid=document.getElementById('adVideo');
   vid.pause();
+  vid.muted=true;
   vid.currentTime=0;
   document.getElementById('adOverlay').style.display='none';
+  const unmuteBtn=document.getElementById('adUnmute');
+  if(unmuteBtn){unmuteBtn.style.display='none'; unmuteBtn.textContent='🔇 Sesi Aç'; unmuteBtn.style.background='rgba(0,0,0,0.7)';}
   const iframe=document.createElement('iframe');
   iframe.src=pendingSrc;
   iframe.setAttribute('allowfullscreen','');
@@ -597,7 +625,9 @@ function closeModal(){
   // iframe ve video temizle
   document.querySelectorAll('#modalPlayer iframe').forEach(el=>el.remove());
   const vid=document.getElementById('adVideo');
-  vid.pause(); vid.currentTime=0;
+  vid.pause(); vid.muted=true; vid.currentTime=0;
+  const unmuteBtn=document.getElementById('adUnmute');
+  if(unmuteBtn){unmuteBtn.style.display='none'; unmuteBtn.textContent='🔇 Sesi Aç'; unmuteBtn.style.background='rgba(0,0,0,0.7)';}
   // Overlay sıfırla ama gizle (bir sonraki açılışa hazır)
   const overlay=document.getElementById('adOverlay');
   overlay.style.display='none';
